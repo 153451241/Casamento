@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casamento Gabriel & Sabrina</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        
+        /* Variáveis de Cores - Clean e Elegante */
+        :root {
+            --primary: #d4af37; /* Dourado suave */
+            --bg: #f9f9f9;
+            --text: #333;
+            --white: #ffffff;
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+            --cinza: #999;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #e0e0e0; /* Fundo do PC */
+            display: flex;
+            justify-content: center;
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Container Principal (Simulando Celular) */
+        #app-container {
+            width: 100%;
+            max-width: 450px; /* Largura mobile */
+            min-height: 100vh;
+            background-color: var(--bg);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Landing/Hero Section */
+        header {
+            padding: 40px 20px 20px;
+            text-align: center;
+            background: var(--white);
+            border-bottom: 1px solid #eee;
+        }
+
+        h1 { font-family: 'Great Vibes', cursive; font-size: 3rem; color: var(--primary); }
+        p.data { letter-spacing: 2px; font-size: 0.9rem; margin-top: 5px; text-transform: uppercase; color: var(--cinza); }
+        p.desc { font-size: 0.85rem; margin-top: 15px; color: #666; }
+
+        /* Estilo do Popup/Modal Inicial */
+        #name-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .modal-content {
+            background: var(--white);
+            width: 85%;
+            max-width: 350px;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-content h2 { margin-bottom: 15px; font-weight: 600; font-size: 1.5rem; }
+        .modal-content p { font-size: 0.9rem; color: #555; }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .btn-entrar {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .btn-pular {
+            display: block;
+            margin-top: 15px;
+            color: #888;
+            text-decoration: underline;
+            font-size: 0.8rem;
+        }
+
+        /* Esconde o modal com classe JS */
+        .hidden { display: none !important; }
+
+        /* GRID DE PRESENTES */
+
+        .filtros-container {
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filtros-container label {
+            font-size: 0.85rem;
+            color: var(--cinza);
+            font-weight: 600;
+        }
+
+        .filtros-container select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+            background: var(--white);
+            color: var(--text);
+            cursor: pointer;
+        }
+        main { padding: 20px; }
+        
+        .grid-presentes {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 colunas no celular */
+            gap: 15px;
+            padding-bottom: 100px; /* Espaço para o carrinho que virá depois */
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .card img {
+            width: 100%;
+            height: 150px; /* Deixei um tiquinho mais alto pra dar destaque */
+            object-fit: contain; /* A mágica que espreme a foto sem distorcer! */
+            background-color: #ffffff; /* Fundo branco pra fotos de produtos ficarem invisíveis no fundo */
+            padding: 15px; /* Dá um respiro, pra foto não ficar encostando nas bordas */
+        }
+
+        .card-info {
+            padding: 12px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-info h3 {
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+            line-height: 1.2;
+            min-height: 30px; 
+        }
+
+        .card-info .preco {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+
+        .select-qtd {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text);
+            background-color: var(--bg);
+            outline: none;
+        }
+
+        .btn-presentear {
+            background: #f0f0f0;
+            color: var(--text);
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        
+        .btn-presentear:active { background: #e0e0e0; }
+
+        /* SISTEMA DE COTAS */
+        .container-cota {
+            background: #eee;
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+        
+        .progresso-cota {
+            background: var(--primary);
+            height: 100%;
+        }
+        
+        .info-cota {
+            font-size: 0.65rem;
+            color: var(--cinza);
+            text-align: right;
+            margin-bottom: 10px;
+        }
+
+        /* ESTADO: COMPRADO / INCLICÁVEL */
+        .card.comprado {
+            filter: grayscale(100%);
+            opacity: 0.6;
+            pointer-events: none; /* Deixa inclicável */
+        }
+
+        .selo-comprado {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-10deg);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            z-index: 10;
+            width: 85%;
+            text-align: center;
+        }
+
+        /* --- ESTILOS DO CARRINHO --- */
+        #cart-button {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--text); color: var(--white);
+            padding: 15px 25px; border-radius: 30px; font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); cursor: pointer;
+            z-index: 100; width: 85%; max-width: 380px; text-align: center;
+        }
+
+        #cart-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: flex; align-items: flex-end;
+            justify-content: center; z-index: 1000;
+        }
+
+        .cart-content {
+            background: var(--bg); width: 100%; max-width: 450px;
+            height: 75vh; border-radius: 20px 20px 0 0; padding: 20px;
+            display: flex; flex-direction: column; animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .cart-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 15px; margin-bottom: 15px; }
+        .close-btn { background: none; border: none; font-size: 1.2rem; font-weight: bold; color: var(--cinza); cursor: pointer; }
+        #cart-items-list { flex-grow: 1; overflow-y: auto; }
+        
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #ddd; }
+        .cart-item-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 3px; }
+        .cart-item-price { color: var(--primary); font-weight: 700; font-size: 0.85rem;}
+        .btn-remover { background: #ff4d4d; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; }
+
+        .cart-footer { border-top: 1px solid #ddd; padding-top: 15px; margin-top: auto; }
+        .cart-footer input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ccc; border-radius: 8px; outline: none; font-family: 'Montserrat', sans-serif;}
+        .btn-checkout { background: #009ee3; color: white; border: none; padding: 15px; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; }
+    .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+    
+    .badge-cota {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--primary);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px; /* Mais arredondado fica mais moderno */
+    font-size: 0.55rem; /* Fonte um pouco menor pra caber o texto */
+    font-weight: 700;
+    text-transform: uppercase;
+    z-index: 5;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.selo-comprado {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    background: rgba(212, 175, 55, 0.9); /* Dourado com transparência */
+    color: white;
+    padding: 15px;
+    border: 2px dashed #fff;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    z-index: 10;
+    width: 80%;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <div id="name-modal">
+            <div class="modal-content">
+                <h2>Olá!</h2>
+                <p style="margin-bottom: 5px; font-weight: 600;">Sua presença já é parte do nosso sonho.</p>
+                <p style="font-size: 0.85rem;">Escolha o presente ou a cota que fizer sentido para você.</p>
+                
+                <input type="text" id="guest-name" placeholder="Seu nome (Para o cartão)">
+                <button class="btn-entrar" onclick="entrarNoSite()">Ver Lista de Presentes</button>
+                <a href="#" class="btn-pular" onclick="entrarNoSite()">Prefiro não me identificar</a>
+            </div>
+        </div>
+
+        <header>
+            <h1>Gabriel & Sabrina</h1>
+            <p class="data">18 de Julho de 2026</p>
+            <p class="desc">Ajude-nos a construir nosso sonho!</p>
+        </header>
+
+        <div class="filtros-container">
+            <label for="ordenar">Filtrar por:</label>
+            <select id="ordenar" onchange="aplicarFiltro()">
+                <option value="aleatorio">Misturado (Padrão)</option>
+                <option value="maior">Maior Valor</option>
+                <option value="menor">Menor Valor</option>
+            </select>
+        </div>
+
+        <main>
+            <div class="grid-presentes" id="grid-items">
+                </div>
+        </main>
+        <div id="cart-button" class="hidden" onclick="abrirCarrinho()">
+            🛒 Ver Carrinho (<span id="cart-count">0</span>) - R$ <span id="cart-total">0,00</span>
+        </div>
+
+        <div id="cart-modal" class="hidden">
+            <div class="cart-content">
+                <div class="cart-header">
+                    <h2>Seu Carrinho</h2>
+                    <button onclick="fecharCarrinho()" class="close-btn">X</button>
+                </div>
+                <div id="cart-items-list">
+                    </div>
+                <div class="cart-footer">
+                    <h3>Total: R$ <span id="cart-final-total">0,00</span></h3>
+                    <p style="font-size: 0.75rem; color: #888; margin-top: 5px;">*Pagamento 100% seguro via Mercado Pago</p>
+                    <input type="email" id="comprador-email" placeholder="Seu melhor e-mail (para o recibo)" required>
+                    <button class="btn-checkout" onclick="finalizarCompra()">💳 Pagar com Mercado Pago</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlHIXmlYin-m19zM2FGgQN--DAd2tkY0I",
+            authDomain: "casamento-a4e8d.firebaseapp.com",
+            projectId: "casamento-a4e8d",
+            storageBucket: "casamento-a4e8d.firebasestorage.app",
+            messagingSenderId: "708256122338",
+            appId: "1:708256122338:web:7775fe269294f34084a5bb",
+            databaseURL: "https://casamento-a4e8d-default-rtdb.firebaseio.com"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        let presentes = []; // Variável vazia que vai ser preenchida pela nuvem
+
+        // --- PARTE 1: LÓGICA DO NOME E MODAL ---
+        // --- PARTE 1: LÓGICA DO NOME E MODAL ---
+        window.entrarNoSite = function() {
+            const nomeInput = document.getElementById('guest-name').value.trim();
+            const nomeFinal = nomeInput !== "" ? nomeInput : "Convidado";
+            
+            // Mudamos de localStorage (memória eterna) para sessionStorage (memória só da aba aberta)
+            sessionStorage.setItem('convidado_nome', nomeFinal);
+            document.getElementById('name-modal').classList.add('hidden');
+        }
+
+        // --- PARTE 2: DADOS DOS PRESENTES (EXEMPLO) ---
+        // Aqui é onde vamos colocar a sua lista oficial depois
+        const listaInicial = [
+            // --- ITENS COM COTAS (> R$ 400) ---
+            {
+                id: 1,
+                nome: "Air Fryer gigante para as marmitas da semana",
+                precoTotal: 549.00,
+                valorCota: 137.25, 
+                imagem: "img/airfryer.jpg",
+                comprado: false, compradoPor: "",
+                isCota: true, totalCotas: 4, cotasPagas: 0
+            },
+            {
+                id: 5,
+                nome: "Micro-ondas espelhado (pra esquentar o frango com batata)",
+                precoTotal: 689.00,
+                valorCota: 137.80,
+                imagem: "img/microondas.jpg",
+                comprado: false, compradoPor: "",
+                isCota: true, totalCotas: 5, cotasPagas: 0
+            },
+            {
+                id: 10,
+                nome: "TV 65' pro cinema em casa e um farm no WoW",
+                precoTotal: 3655.00,
+                valorCota: 152.29,
+                imagem: "img/tv65.jpg",
+                comprado: false, compradoPor: "",
+                isCota: true, totalCotas: 24, cotasPagas: 0
+            },
+            {
+                id: 11,
+                nome: "Lava e Seca (a salvação da lavanderia no inverno)",
+                precoTotal: 2469.00,
+                valorCota: 154.31,
+                imagem: "img/lavaeseca.jpg",
+                comprado: false, compradoPor: "",
+                isCota: true, totalCotas: 16, cotasPagas: 0
+            },
+            {
+                id: 12,
+                nome: "Fogão 5 bocas para os almoços de domingo",
+                precoTotal: 1489.00,
+                valorCota: 148.90,
+                imagem: "img/fogao.jpg",
+                comprado: false, compradoPor: "",
+                isCota: true, totalCotas: 10, cotasPagas: 0
+            },
+            {
+                id: 13,
+                nome: "A Geladeira dos sonhos (pra encher de comida boa)",
+                precoTotal: 3047.00,
+                valorCota: 152.35,
+                imagem: "img/geladeira.jpg",
+                comprado: false, compradoPor: "",
+                isCota: true, totalCotas: 20, cotasPagas: 0
+            },
+            {
+                id: 15,
+                nome: "Adega para brindar o novo ciclo com os amigos",
+                precoTotal: 713.00,
+                valorCota: 142.60,
+                imagem: "img/adega.jpg",
+                comprado: false, compradoPor: "",
+                isCota: true, totalCotas: 5, cotasPagas: 0
+            },
+            {
+                id: 17,
+                nome: "Purificador de água geladinha sempre pronta",
+                precoTotal: 604.00,
+                valorCota: 151.00,
+                imagem: "img/purificador.jpg",
+                comprado: false, compradoPor: "",
+                isCota: true, totalCotas: 4, cotasPagas: 0
+            },
+            {
+                id: 18,
+                nome: "Jogo de Panelas antiaderentes (as de respeito!)",
+                precoTotal: 659.00,
+                valorCota: 164.75,
+                imagem: "img/panelas.jpg",
+                comprado: false, compradoPor: "",
+                isCota: true, totalCotas: 4, cotasPagas: 0
+            },
+            {
+                id: 22,
+                nome: "Som de cinema para as noites de filme e videogame",
+                precoTotal: 990.00,
+                valorCota: 141.42,
+                imagem: "img/soundbar.jpg",
+                comprado: false, compradoPor: "",
+                isCota: true, totalCotas: 7, cotasPagas: 0
+            },
+            {
+                id: 23,
+                nome: "Aparelho de Jantar lindão para receber as visitas",
+                precoTotal: 476.00,
+                valorCota: 158.66,
+                imagem: "img/jantar.jpg",
+                comprado: false, compradoPor: "",
+                isCota: true, totalCotas: 3, cotasPagas: 0
+            },
+
+            // --- ITENS DIRETOS (< R$ 400) ---
+            {
+                id: 2, nome: "Batedeira Planetária para as receitas da Sabrina", precoTotal: 379.00, imagem: "img/batedeira.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 3, nome: "Liquidificador potente para as Margaritas", precoTotal: 239.00, imagem: "img/liquidificador.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 4, nome: "Cafeteira para os dias de muito trabalho na agência", precoTotal: 399.00, imagem: "img/cafeteira.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 6, nome: "Vaporizador para roupas sempre alinhadas", precoTotal: 219.00, imagem: "img/vaporizador.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 7, nome: "Aspirador vertical prático para o dia a dia", precoTotal: 199.00, imagem: "img/aspirador.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 8, nome: "Mini Grill para os lanches rápidos", precoTotal: 141.00, imagem: "img/minigrill.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 9, nome: "Chaleira elétrica para o café ou chá da tarde", precoTotal: 183.00, imagem: "img/chaleira.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 14, nome: "Ventilador Turbo (Para a sala)", precoTotal: 184.00, imagem: "img/ventilador1.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 142, nome: "Ventilador Turbo (Para o quarto)", precoTotal: 184.00, imagem: "img/ventilador2.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 16, nome: "Mini shaker elétrico para o pós-treino", precoTotal: 259.90, imagem: "img/shaker.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 19, nome: "Kit de Facas Masterchef", precoTotal: 380.00, imagem: "img/facas.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 20, nome: "Conjunto de travessas para o almoço em família", precoTotal: 149.00, imagem: "img/travessas.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 21, nome: "Kit de potes herméticos para a dieta", precoTotal: 182.00, imagem: "img/potesvidro.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 24, nome: "Faqueiro de Inox completo", precoTotal: 199.00, imagem: "img/faqueiro.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 25, nome: "Conjunto Diamante para o Home Bar", precoTotal: 110.00, imagem: "img/coposdiamante.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 26, nome: "Escorredor de louça moderno (dois andares)", precoTotal: 118.00, imagem: "img/escorredor.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 27, nome: "Kit Cobre Leito macio para o quarto", precoTotal: 136.00, imagem: "img/cobreleito.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 28, nome: "Jogo de Toalhas de banho felpudas", precoTotal: 209.00, imagem: "img/toalhas.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 29, nome: "Coberdrom grosso para o inverno no Chile", precoTotal: 209.00, imagem: "img/coberdrom.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 30, nome: "Kit de Tábuas rústicas", precoTotal: 98.00, imagem: "img/tabuas.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 31, nome: "Kit de utensílios de silicone (pra não riscar a panela)", precoTotal: 137.00, imagem: "img/utensilios.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 32, nome: "Kit de paninhos de prato de chef", precoTotal: 67.00, imagem: "img/panos.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 33, nome: "Kit de potinhos para os temperos da casa", precoTotal: 79.00, imagem: "img/temperos.jpg", comprado: false, compradoPor: "", isCota: false
+            },
+            {
+                id: 34, nome: "Jarra de vidro elegante com fio de ouro", precoTotal: 49.00, imagem: "img/jarra.jpg", comprado: false, compradoPor: "", isCota: false
+            }
+        ];
+
+        // --- RENDERIZAR OS ITENS NA TELA ---
+        // --- LÓGICA DE EMBARALHAR E FILTRAR ---
+        function embaralhar(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        window.aplicarFiltro = function() {
+            // Pega o valor do select (se o usuário escolheu maior, menor ou aleatório)
+            const filtro = document.getElementById('ordenar').value;
+            let listaFiltrada = [...presentes]; // Faz uma cópia da sua lista original
+
+            // Se for aleatório, embaralha primeiro
+            if (filtro === 'aleatorio') {
+                embaralhar(listaFiltrada);
+            }
+
+            // Aplica as regras de organização
+            listaFiltrada.sort((a, b) => {
+                // REGRA 1: Comprados sempre pro final da lista (Independente do preço)
+                if (a.comprado && !b.comprado) return 1;
+                if (!a.comprado && b.comprado) return -1;
+                
+                // REGRA 2: Organiza por Preço Total (Só se não for aleatório)
+                if (filtro === 'maior') return b.precoTotal - a.precoTotal;
+                if (filtro === 'menor') return a.precoTotal - b.precoTotal;
+                
+                return 0; 
+            });
+
+            // Manda a lista organizada para ser desenhada na tela
+            renderizarItens(listaFiltrada);
+        }
+
+        // --- RENDERIZAR OS ITENS NA TELA ---
+        function renderizarItens(listaParaRenderizar) {
+            const grid = document.getElementById('grid-items');
+            
+            grid.innerHTML = listaParaRenderizar.map(item => {
+                let progressoHTML = '';
+                let textoPreco = '';
+                let seletorQtd = '';
+
+                // --- GATILHOS MENTAIS (PARTE 2 SNIPER) ---
+                let badgeHTML = '';
+                if (!item.comprado) {
+                    if (item.isCota) {
+                        badgeHTML = '<div class="badge-cota">Pode ser dado em grupo</div>';
+                    } else if (item.precoTotal <= 100) {
+                        badgeHTML = '<div class="badge-cota" style="background:#27ae60">Boa opção até R$100</div>';
+                    } else if (item.id === 1 || item.id === 13) { 
+                        // ID 1 é Airfryer e 13 é Geladeira na sua listaInicial
+                        badgeHTML = '<div class="badge-cota" style="background:#e67e22">Presente mais escolhido</div>';
+                    }
+                }
+
+                if (item.isCota) {
+                    const cotasRestantes = item.totalCotas - item.cotasPagas;
+                    const porcentagem = (item.cotasPagas / item.totalCotas) * 100;
+                    progressoHTML = `
+                        <div class="container-cota">
+                            <div class="progresso-cota" style="width: ${porcentagem}%"></div>
+                        </div>
+                        <p class="info-cota">${item.cotasPagas}/${item.totalCotas} cotas garantidas</p>
+                    `;
+                    textoPreco = `Cota: R$ ${item.valorCota.toFixed(2).replace('.', ',')}`;
+                    if (!item.comprado && cotasRestantes > 0) {
+                        let options = '';
+                        for(let i = 1; i <= cotasRestantes; i++) {
+                            options += `<option value="${i}">${i} ${i === 1 ? 'cota' : 'cotas'} (R$ ${(i * item.valorCota).toFixed(2).replace('.', ',')})</option>`;
+                        }
+                        seletorQtd = `<select id="qtd-${item.id}" class="select-qtd">${options}</select>`;
+                    }
+                } else {
+                    textoPreco = `R$ ${item.precoTotal.toFixed(2).replace('.', ',')}`;
+                }
+
+                return `
+                    <div class="card ${item.comprado ? 'comprado' : ''}">
+                        ${badgeHTML} ${item.comprado ? `<div class="selo-comprado">Dado por:<br>${item.compradoPor}</div>` : ''}
+                        
+                        <img src="${item.imagem}" alt="${item.nome}" onclick="abrirProduto(${item.id})" style="cursor:zoom-in;">
+                        
+                        <div class="card-info">
+                            <div>
+                                <h3>${item.nome}</h3>
+                                <p class="preco">${textoPreco}</p>
+                                ${progressoHTML}
+                            </div>
+                            
+                            <div style="margin-top: 10px;">
+                                ${seletorQtd}
+                                <button class="btn-presentear" onclick="adicionarAoCarrinho(${item.id}, ${item.isCota})">
+                                    ${item.isCota ? 'Dar Cota' : 'Presentear'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- FUNÇÃO DO CARRINHO ---
+        // --- 5. LÓGICA DO CARRINHO ---
+        let carrinho = []; // Memória do carrinho
+
+        // Substitui o alert antigo
+        window.adicionarAoCarrinho = function(id, isCota) {
+            const item = presentes.find(p => p.id === id);
+            let quantidade = 1;
+            let precoUnico = isCota ? item.valorCota : item.precoTotal;
+
+            if (isCota) {
+                const selectElement = document.getElementById(`qtd-${id}`);
+                if(selectElement) quantidade = parseInt(selectElement.value);
+            }
+            
+            carrinho.push({ id: item.id, nome: item.nome, quantidade: quantidade, precoTotal: precoUnico * quantidade, isCota: isCota });
+            atualizarBotaoCarrinho();
+        }
+
+        window.atualizarBotaoCarrinho = function() {
+            const btn = document.getElementById('cart-button');
+            if (carrinho.length > 0) {
+                btn.classList.remove('hidden');
+                document.getElementById('cart-count').innerText = carrinho.reduce((s, i) => s + i.quantidade, 0);
+                document.getElementById('cart-total').innerText = carrinho.reduce((s, i) => s + i.precoTotal, 0).toFixed(2).replace('.', ',');
+            } else {
+                btn.classList.add('hidden');
+            }
+        }
+
+        window.abrirCarrinho = function() {
+            renderizarCarrinho();
+            document.getElementById('cart-modal').classList.remove('hidden');
+        }
+
+        window.fecharCarrinho = function() { document.getElementById('cart-modal').classList.add('hidden'); }
+
+        window.removerDoCarrinho = function(index) {
+            carrinho.splice(index, 1);
+            atualizarBotaoCarrinho();
+            renderizarCarrinho();
+        }
+
+        window.renderizarCarrinho = function() {
+            const lista = document.getElementById('cart-items-list');
+            if (carrinho.length === 0) {
+                lista.innerHTML = '<p style="text-align:center; color:#888; margin-top: 20px;">Carrinho vazio :(</p>';
+                document.getElementById('cart-final-total').innerText = "0,00";
+                return;
+            }
+
+            let valorF = 0;
+            lista.innerHTML = carrinho.map((item, index) => {
+                valorF += item.precoTotal;
+                return `
+                    <div class="cart-item">
+                        <div>
+                            <div class="cart-item-title">${item.nome}</div>
+                            <div class="cart-item-price">${item.isCota ? item.quantidade + ' cota(s)' : '1 unid.'} - R$ ${item.precoTotal.toFixed(2).replace('.', ',')}</div>
+                        </div>
+                        <button class="btn-remover" onclick="removerDoCarrinho(${index})">X</button>
+                    </div>`;
+            }).join('');
+            document.getElementById('cart-final-total').innerText = valorF.toFixed(2).replace('.', ',');
+        }
+
+        window.finalizarCompra = async function() {
+            const email = document.getElementById('comprador-email').value;
+            if (!email || !email.includes('@')) {
+                alert("Por favor, digite um e-mail válido para enviarmos o recibo.");
+                return;
+            }
+
+            // Muda o botão para mostrar que está carregando
+            const btn = document.querySelector('.btn-checkout');
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = "⏳ Gerando link seguro...";
+            btn.disabled = true;
+            btn.style.background = "#999";
+
+            // Formata os itens do carrinho pro padrão que o Mercado Pago exige
+            const itensMP = carrinho.map(item => {
+                return {
+                    title: item.nome,
+                    description: item.isCota ? "Cota de presente de casamento" : "Presente de casamento",
+                    quantity: item.quantidade,
+                    currency_id: "BRL",
+                    unit_price: Number((item.precoTotal / item.quantidade).toFixed(2))
+                }
+            });
+
+            try {
+                // AQUI ENTRA O SEU BACKEND BLINDADO DO RENDER!
+                const URL_DO_SEU_RENDER = "https://casamento-beck.onrender.com/criar-preferencia";
+
+                const resposta = await fetch(URL_DO_SEU_RENDER, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        items: itensMP,
+                        payer: { email: email }
+                    })
+                });
+
+                const dados = await resposta.json();
+
+                if (dados.init_point) {
+                    // 1. Pega o nome de quem tá comprando
+                    const nomeComprador = sessionStorage.getItem('convidado_nome') || "Alguém especial";
+
+                    // 2. Atualiza os itens no nosso banco de dados
+                    carrinho.forEach(itemCarrinho => {
+                        const itemBanco = presentes.find(p => p.id === itemCarrinho.id);
+                        if (itemBanco) {
+                            if (itemBanco.isCota) {
+                                itemBanco.cotasPagas += itemCarrinho.quantidade;
+                                // Se pagou a última cota, marca como totalmente comprado
+                                if (itemBanco.cotasPagas >= itemBanco.totalCotas) {
+                                    itemBanco.comprado = true;
+                                    itemBanco.compradoPor = nomeComprador;
+                                }
+                            } else {
+                                itemBanco.comprado = true;
+                                itemBanco.compradoPor = nomeComprador;
+                            }
+                        }
+                    });
+
+                    // 3. Salva no Firebase e redireciona
+                    set(ref(db, 'presentes'), presentes).then(() => {
+                        carrinho = []; 
+                        window.location.href = dados.init_point;
+                    });
+                    
+                } else {
+                    console.log(dados);
+                    alert("Opa, deu um erro ao gerar o pagamento. Tente novamente.");
+                    btn.innerHTML = textoOriginal;
+                    btn.disabled = false;
+                    btn.style.background = "#009ee3";
+                }
+            } catch (erro) {
+                console.error(erro);
+                alert("Erro de conexão com o Servidor de Pagamento. Tente novamente.");
+                btn.innerHTML = textoOriginal;
+                btn.disabled = false;
+                btn.style.background = "#009ee3";
+            }
+        }
+
+        // --- INICIALIZAÇÃO E FIREBASE ---
+        window.onload = function() {
+            // Limpa qualquer nome que tenha ficado de antes para sempre começar do zero
+            sessionStorage.removeItem('convidado_nome');
+            document.getElementById('name-modal').classList.remove('hidden');
+            
+            const presentesRef = ref(db, 'presentes');
+            // ... resto do código do Firebase continua igual
+            
+            
+
+            // 1. Injeta sua listaInicial se o banco de dados estiver vazio
+            get(presentesRef).then((snapshot) => {
+                if (!snapshot.exists()) {
+                    set(presentesRef, listaInicial);
+                }
+            });
+
+            // 2. Fica escutando a nuvem. Qualquer mudança, ele atualiza a tela na hora!
+            onValue(presentesRef, (snapshot) => {
+                const dados = snapshot.val();
+                if (dados) {
+                    presentes = Array.isArray(dados) ? dados : Object.values(dados);
+                    window.aplicarFiltro(); 
+                }
+            });
+        }
+
+        window.abrirProduto = function(id) {
+            const item = presentes.find(p => p.id === id);
+            const modal = document.getElementById('product-modal');
+            const corpo = document.getElementById('modal-produto-corpo');
+            
+            // Lógica de preço e cotas (copiada da sua renderização principal)
+            let detalhesVenda = '';
+            if (item.isCota) {
+                const cotasRestantes = item.totalCotas - item.cotasPagas;
+                let options = '';
+                for(let i = 1; i <= cotasRestantes; i++) {
+                    options += `<option value="${i}">${i} ${i === 1 ? 'cota' : 'cotas'}</option>`;
+                }
+                detalhesVenda = `
+                    <p style="color:var(--primary); font-weight:700; margin-bottom:10px;">Cota: R$ ${item.valorCota.toFixed(2).replace('.', ',')}</p>
+                    <select id="modal-qtd-${item.id}" class="select-qtd" style="margin-bottom:15px;">${options}</select>
+                `;
+            } else {
+                detalhesVenda = `<p style="color:var(--primary); font-weight:700; font-size:1.2rem; margin-bottom:15px;">R$ ${item.precoTotal.toFixed(2).replace('.', ',')}</p>`;
+            }
+
+            corpo.innerHTML = `
+                <img src="${item.imagem}" style="width:100%; height:300px; object-fit:contain; padding:20px; background:#fff;">
+                <div style="padding:20px; text-align:center;">
+                    <h3 style="margin-bottom:10px; font-size:1.1rem;">${item.nome}</h3>
+                    ${detalhesVenda}
+                    <button class="btn-presentear" style="padding:15px; font-size:1rem;" onclick="adicionarAoCarrinho(${item.id}, ${item.isCota}); fecharProduto();">
+                        ${item.isCota ? 'Adicionar Cotas ao Carrinho' : 'Adicionar ao Carrinho'}
+                    </button>
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+
+        window.fecharProduto = function() {
+            document.getElementById('product-modal').style.display = 'none';
+        }
+
+
+
+    </script>
+    <div id="product-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 5000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+        <div style="background: white; width: 90%; max-width: 400px; border-radius: 20px; overflow: hidden; position: relative; animation: slideUp 0.3s ease;">
+            <button onclick="fecharProduto()" style="position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.5); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; font-weight: bold; cursor: pointer; z-index: 10;">X</button>
+            <div id="modal-produto-corpo">
+                </div>
+        </div>
+    </div>
+</body>
+</html>
