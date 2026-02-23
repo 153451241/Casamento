@@ -356,6 +356,12 @@
             <h1>Gabriel & Sabrina</h1>
             <p class="data">18 de Julho de 2026</p>
             <p class="desc">Ajude-nos a construir nosso sonho!</p>
+            <div style="margin-top: 25px; padding: 0 10px; text-align: center;">
+                <p style="font-size: 0.85rem; color: #555; margin-bottom: 8px; font-weight: 600;">💛 <span id="sonho-porcentagem">0</span>% do nosso sonho já foi construído graças a vocês!</p>
+                <div class="container-cota" style="height: 12px; background: #ddd; border-radius: 6px;">
+                    <div id="sonho-barra" class="progresso-cota" style="width: 0%; border-radius: 6px; transition: width 1.5s ease-in-out;"></div>
+                </div>
+            </div>
         </header>
 
         <div class="filtros-container">
@@ -387,7 +393,7 @@
                     <h3>Total: R$ <span id="cart-final-total">0,00</span></h3>
                     <p style="font-size: 0.75rem; color: #888; margin-top: 5px;">*Pagamento 100% seguro via Mercado Pago</p>
                     <input type="email" id="comprador-email" placeholder="Seu melhor e-mail (para o recibo)" required>
-                    <button class="btn-checkout" onclick="finalizarCompra()">💳 Pagar com Mercado Pago</button>
+                    <button class="btn-checkout" onclick="finalizarCompra()">💳 Finalizar presente com segurança</button>
                 </div>
             </div>
         </div>
@@ -395,7 +401,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAlHIXmlYin-m19zM2FGgQN--DAd2tkY0I",
@@ -684,7 +690,7 @@
 
                 return `
                     <div class="card ${item.comprado ? 'comprado' : ''}">
-                        ${badgeHTML} ${item.comprado ? `<div class="selo-comprado">Dado por:<br>${item.compradoPor}</div>` : ''}
+                        ${badgeHTML} ${item.comprado ? `<div class="selo-comprado">Presenteado por:<br>${item.compradoPor}</div>` : ''}
                         
                         <img src="${item.imagem}" alt="${item.nome}" onclick="abrirProduto(${item.id})" style="cursor:zoom-in;">
                         
@@ -799,50 +805,27 @@
             });
 
             try {
-                // AQUI ENTRA O SEU BACKEND BLINDADO DO RENDER!
+                const nomeComprador = sessionStorage.getItem('convidado_nome') || "Alguém especial";
                 const URL_DO_SEU_RENDER = "https://casamento-beck.onrender.com/criar-preferencia";
 
+                // Agora mandamos as infos pro Python e esquecemos do Firebase aqui no front!
                 const resposta = await fetch(URL_DO_SEU_RENDER, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         items: itensMP,
-                        payer: { email: email }
+                        payer: { email: email },
+                        nome_comprador: nomeComprador,
+                        carrinho_banco: carrinho // O Python precisa saber o que foi comprado
                     })
                 });
 
                 const dados = await resposta.json();
 
                 if (dados.init_point) {
-                    // 1. Pega o nome de quem tá comprando
-                    const nomeComprador = sessionStorage.getItem('convidado_nome') || "Alguém especial";
-
-                    // 2. Atualiza os itens no nosso banco de dados
-                    carrinho.forEach(itemCarrinho => {
-                        const itemBanco = presentes.find(p => p.id === itemCarrinho.id);
-                        if (itemBanco) {
-                            if (itemBanco.isCota) {
-                                itemBanco.cotasPagas += itemCarrinho.quantidade;
-                                // Se pagou a última cota, marca como totalmente comprado
-                                if (itemBanco.cotasPagas >= itemBanco.totalCotas) {
-                                    itemBanco.comprado = true;
-                                    itemBanco.compradoPor = nomeComprador;
-                                }
-                            } else {
-                                itemBanco.comprado = true;
-                                itemBanco.compradoPor = nomeComprador;
-                            }
-                        }
-                    });
-
-                    // 3. Salva no Firebase e redireciona
-                    set(ref(db, 'presentes'), presentes).then(() => {
-                        carrinho = []; 
-                        window.location.href = dados.init_point;
-                    });
-                    
+                    carrinho = []; // Só limpa o carrinho
+                    window.location.href = dados.init_point; // Joga pra tela azul
                 } else {
-                    console.log(dados);
                     alert("Opa, deu um erro ao gerar o pagamento. Tente novamente.");
                     btn.innerHTML = textoOriginal;
                     btn.disabled = false;
@@ -850,7 +833,7 @@
                 }
             } catch (erro) {
                 console.error(erro);
-                alert("Erro de conexão com o Servidor de Pagamento. Tente novamente.");
+                alert("Erro de conexão com o Servidor de Pagamento.");
                 btn.innerHTML = textoOriginal;
                 btn.disabled = false;
                 btn.style.background = "#009ee3";
@@ -859,6 +842,10 @@
 
         // --- INICIALIZAÇÃO E FIREBASE ---
         window.onload = function() {
+
+            // ACORDA O SERVIDOR (Warm-up)
+            // Faz uma requisição "fantasma" só para o Render ligar os motores
+            fetch("https://casamento-beck.onrender.com/webhook").catch(() => {});
             // Limpa qualquer nome que tenha ficado de antes para sempre começar do zero
             sessionStorage.removeItem('convidado_nome');
             document.getElementById('name-modal').classList.remove('hidden');
@@ -868,18 +855,26 @@
             
             
 
-            // 1. Injeta sua listaInicial se o banco de dados estiver vazio
-            get(presentesRef).then((snapshot) => {
-                if (!snapshot.exists()) {
-                    set(presentesRef, listaInicial);
-                }
-            });
+            
 
             // 2. Fica escutando a nuvem. Qualquer mudança, ele atualiza a tela na hora!
             onValue(presentesRef, (snapshot) => {
                 const dados = snapshot.val();
                 if (dados) {
                     presentes = Array.isArray(dados) ? dados : Object.values(dados);
+                    // --- CÁLCULO DA BARRA DE PROGRESSO GLOBAL ---
+                    const totalGeral = presentes.reduce((s, i) => s + i.precoTotal, 0);
+                    const totalArrecadado = presentes.reduce((s, i) => {
+                        if(i.isCota) return s + (i.cotasPagas * i.valorCota);
+                        if(i.comprado) return s + i.precoTotal;
+                        return s;
+                    }, 0);
+                    
+                    const porcentagem = totalGeral > 0 ? ((totalArrecadado / totalGeral) * 100).toFixed(1) : 0;
+                    
+                    document.getElementById('sonho-porcentagem').innerText = porcentagem;
+                    document.getElementById('sonho-barra').style.width = porcentagem + '%';
+                    // --------------------------------------------
                     window.aplicarFiltro(); 
                 }
             });
