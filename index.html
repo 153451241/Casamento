@@ -657,6 +657,9 @@
                 // --- GATILHOS MENTAIS (PARTE 2 SNIPER) ---
                 let badgeHTML = '';
                 if (!item.comprado) {
+    if (item.categoria === 'experiencia') {
+        badgeHTML = '<div class="badge-cota" style="background:#2980b9">Contribua para essa experiência</div>';
+    
                     if (item.isCota) {
                         badgeHTML = '<div class="badge-cota">Pode ser dado em grupo</div>';
                     } else if (item.precoTotal <= 100) {
