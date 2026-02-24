@@ -61,22 +61,22 @@
             color: var(--text);
             font-size: 1.1rem;
         }
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--primary);
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto 10px;
+        
+        /* --- ESTILO DO BOTÃO DE VOLTAR --- */
+        .btn-voltar {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: background 0.3s ease, transform 0.2s ease;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .texto-retorno {
-            font-size: 0.8rem;
-            color: #888;
+        .btn-voltar:hover {
+            background: #bfa030;
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -93,19 +93,8 @@
         
         <p>Mal podemos esperar para celebrar nossa nova fase com você.</p>
         
-        <div class="loader"></div>
-        <p class="texto-retorno">Redirecionando de volta para a lista...</p>
+        <a href="index.html" class="btn-voltar">Voltar para a lista</a>
     </div>
-
-    <script>
-        // O "Detector" Invisível:
-        // O Webhook do Render já está trabalhando no banco de dados.
-        // Esses 6 segundos dão o tempo exato para o Python atualizar o Firebase.
-        // Quando voltar, o item já vai estar com o selo de comprado!
-        setTimeout(() => {
-            window.location.href = "index.html";
-        }, 6000);
-    </script>
 
 </body>
 </html>
